@@ -1,0 +1,3 @@
+[submodule "rateCounter"]
+	path = rateCounter
+	url = git@github.com:serbuh/rateCounter.git
