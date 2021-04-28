@@ -2,7 +2,7 @@ from rateCounter import rateCounter
 import logging
 import cv2
 
-class CameraPlayer():
+class CameraGrabber():
     def __init__(self, logger):
         self.logger = logger
         # Open the camera device
@@ -64,5 +64,5 @@ if __name__ == "__main__":
 
     logger.info("Welcome to Frame Grabber")
 
-    cam_player = CameraPlayer(logger)
-    cam_player.capture_loop()
+    cam_grabber = CameraGrabber(logger)
+    cam_grabber.capture_loop()
