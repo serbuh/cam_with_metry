@@ -2,7 +2,7 @@ from rateCounter import rateCounter
 import logging
 import cv2
 
-class CameraGrabber():
+class FramesGrabber():
     def __init__(self, logger):
         self.logger = logger
         # Open the camera device
@@ -21,7 +21,7 @@ class CameraGrabber():
         print_rate = 2                          # print messages rate every <print_rate> seconds
         self.videoCounter  = rateCounter.rateCounter("Video",  20, msg_timeout, print_rate)
 
-    def capture_loop(self):
+    def grab_frames_loop(self):
         # Capture frame-by-frame
         while(True):
             ret, frame = self.capture_device.read()
@@ -55,6 +55,8 @@ if __name__ == "__main__":
     # Init logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
+    logger.propagate = False
+    
     # Console handler
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -64,5 +66,5 @@ if __name__ == "__main__":
 
     logger.info("Welcome to Frame Grabber")
 
-    cam_grabber = CameraGrabber(logger)
-    cam_grabber.capture_loop()
+    frames_grabber = FramesGrabber(logger)
+    frames_grabber.grab_frames_loop()

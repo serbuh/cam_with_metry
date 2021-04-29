@@ -3,23 +3,31 @@ from dronekit import connect, VehicleMode
 import time
 import logging
 
-'''
-Callback definition (vehicle observers)
-Callback functions should have the following args:
-'vehicle'   - the associated vehicle object (used if a callback is different for multiple vehicles)
-'attr_name' - the observed attribute (used if callback is used for multiple attributes)
-'value'     - the updated attribute value.
-'''
-def attitude_callback(vehicle, attr_name, value):
-    #vehicle.metry_grabber_context.logger.info("{}".format(value))
-    vehicle.metry_grabber_context.logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(value.yaw, value.pitch, value.roll))
-    # Only publish when value changes
-    #if value!=vehicle.metry_grabber_context.last_attitude_cache:
-    #    vehicle.metry_grabber_context.logger.info("{}".format(value))
-    #    vehicle.metry_grabber_context.last_attitude_cache=value
+class Callbacks():
+    def __init__(self):
+        pass
 
-def location_callback(vehicle, attr_name, value):
-    vehicle.metry_grabber_context.logger.info("{}".format(value))
+    '''
+    Callback definition (vehicle observers)
+    Callback functions should have the following args:
+    'vehicle'   - the associated vehicle object (used if a callback is different for multiple vehicles)
+    'attr_name' - the observed attribute (used if callback is used for multiple attributes)
+    'value'     - the updated attribute value.
+    '''
+
+
+    @staticmethod
+    def attitude_callback(vehicle, attr_name, value):
+        #vehicle.metry_grabber_context.logger.info("{}".format(value))
+        vehicle.metry_grabber_context.logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(value.yaw, value.pitch, value.roll))
+        # Only publish when value changes
+        #if value!=vehicle.metry_grabber_context.last_attitude_cache:
+        #    vehicle.metry_grabber_context.logger.info("{}".format(value))
+        #    vehicle.metry_grabber_context.last_attitude_cache=value
+
+    @staticmethod
+    def location_callback(vehicle, attr_name, value):
+        vehicle.metry_grabber_context.logger.info("{}".format(value))
 
 
 class MetryGrabberContext():
@@ -90,14 +98,14 @@ class MetryGrabber():
     def add_listeners(self):
         self.logger.info("Add vehicle attribute")
         
-        self.vehicle.add_attribute_listener('attitude', attitude_callback)
-        self.vehicle.add_attribute_listener('global_frame', location_callback)
+        self.vehicle.add_attribute_listener('attitude', Callbacks.attitude_callback)
+        self.vehicle.add_attribute_listener('global_frame', Callbacks.location_callback)
 
     def remove_listeners(self):
         self.logger.info("Remove vehicle attribute observers")
 
-        self.vehicle.remove_attribute_listener('attitude', attitude_callback)
-        self.vehicle.remove_attribute_listener('global_frame', location_callback)
+        self.vehicle.remove_attribute_listener('attitude', Callbacks.attitude_callback)
+        self.vehicle.remove_attribute_listener('global_frame', Callbacks.location_callback)
 
 
 if __name__ == "__main__":
