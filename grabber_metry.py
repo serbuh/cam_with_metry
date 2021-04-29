@@ -3,20 +3,29 @@ from dronekit import connect, VehicleMode
 import time
 import logging
 
-#Define callback for `vehicle.attitude` observer
-last_attitude_cache = None
-def attitude_callback(self, attr_name, value):
-    # `attr_name` - the observed attribute (used if callback is used for multiple attributes)
-    # `self` - the associated vehicle object (used if a callback is different for multiple vehicles)
-    # `value` is the updated attribute value.
-    global last_attitude_cache
+'''
+Callback definition (vehicle observers)
+Callback functions should have the following args:
+'vehicle'   - the associated vehicle object (used if a callback is different for multiple vehicles)
+'attr_name' - the observed attribute (used if callback is used for multiple attributes)
+'value'     - the updated attribute value.
+'''
+def attitude_callback(vehicle, attr_name, value):
+    #vehicle.metry_grabber_context.logger.info("{}".format(value))
+    vehicle.metry_grabber_context.logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(value.yaw, value.pitch, value.roll))
     # Only publish when value changes
-    if value!=last_attitude_cache:
-        print(" CALLBACK: Attitude changed to", value)
-        last_attitude_cache=value
+    #if value!=vehicle.metry_grabber_context.last_attitude_cache:
+    #    vehicle.metry_grabber_context.logger.info("{}".format(value))
+    #    vehicle.metry_grabber_context.last_attitude_cache=value
 
-def location_callback(self, attr_name, value):
-    print("Location CALLBACK", value)
+def location_callback(vehicle, attr_name, value):
+    vehicle.metry_grabber_context.logger.info("{}".format(value))
+
+
+class MetryGrabberContext():
+    def __init__(self, logger):
+        self.logger = logger
+        self.last_attitude_cache = None
 
 class MetryGrabber():
     def __init__(self, logger):
@@ -27,6 +36,9 @@ class MetryGrabber():
         logger.info("Connecting to vehicle on: %s" % pixhawk_device)
         self.vehicle = connect(pixhawk_device, wait_ready=False) #  Set wait_ready=True to ensure default attributes are populated before connect() returns.
         self.vehicle.wait_ready('autopilot_version')
+        
+        # Add grabber context to the vehicle object
+        self.vehicle.metry_grabber_context = MetryGrabberContext(self.logger)
 
         # Get all vehicle attributes (state)
         self.logger.debug("\nGet all vehicle attribute values:")
@@ -75,25 +87,25 @@ class MetryGrabber():
         
         self.logger.info("Init complete")
 
-    def grab_loop(self):
-        self.logger.info("Add `attitude` attribute callback/observer on `vehicle`")     
+    def add_listeners(self):
+        self.logger.info("Add vehicle attribute")
+        
         self.vehicle.add_attribute_listener('attitude', attitude_callback)
         self.vehicle.add_attribute_listener('global_frame', location_callback)
 
-        self.logger.info(" Wait 2s so callback invoked before observer removed")
-        time.sleep(2)
+    def remove_listeners(self):
+        self.logger.info("Remove vehicle attribute observers")
 
-        self.logger.info(" Remove Vehicle.attitude observer")    
-        # Remove observer added with `add_attribute_listener()` specifying the attribute and callback function
         self.vehicle.remove_attribute_listener('attitude', attitude_callback)
         self.vehicle.remove_attribute_listener('global_frame', location_callback)
 
-        self.logger.info("Finished")
 
 if __name__ == "__main__":
     # Init logger
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
     # Console handler
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -104,4 +116,9 @@ if __name__ == "__main__":
     logger.info("Welcome to Metry Grabber")
 
     metry_grabber = MetryGrabber(logger)
-    metry_grabber.grab_loop()
+    metry_grabber.add_listeners()
+    logger.info("Wait 2s so callback invoked before observer removed")
+    time.sleep(2)
+    metry_grabber.remove_listeners()
+
+    logger.info("Finished")
