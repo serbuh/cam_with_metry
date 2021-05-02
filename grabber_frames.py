@@ -21,7 +21,13 @@ class FramesGrabber():
         print_rate = 2                          # print messages rate every <print_rate> seconds
         self.videoCounter  = rateCounter.rateCounter("Video",  32, msg_timeout, print_rate, to_print = True, logger = self.logger)
 
-    def grab_frames_loop(self):
+        # Declare callback
+        self.callback = None
+
+    def register_frame_callback(self, callback):
+        self.callback = callback
+
+    def run_grab_frames_loop(self, show = True, save_to_disk = False):
         # Capture frame-by-frame
         while(True):
             ret, frame = self.capture_device.read()
@@ -29,16 +35,18 @@ class FramesGrabber():
             self.videoCounter.newMessage()
             self.videoCounter.printRate(print_immediately = False)
 
-            # Display the resulting frame
-            cv2.imshow("preview",frame)
+            if show:
+                # Display the resulting frame
+                cv2.imshow("preview",frame)
             
-            # Save to disk
-            # cv2.imwrite("outputImage.jpg", frame)
+            if save_to_disk: # TODO save to the folder, with indexed name (%ddd...)
+                # Save to disk
+                cv2.imwrite("outputImage.jpg", frame)
 
-            # Send the frame 
-            # TODO get the last telemetry and send together with the frame
+            # Call the callback
+            self.callback(frame)
 
-            #Waits for a user input to quit the application
+            # Waits for a user input to quit the application NOTE: Even if the opencv window opened from the calling module
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         
@@ -66,5 +74,13 @@ if __name__ == "__main__":
 
     logger.info("Welcome to Frame Grabber")
 
+    def frame_callback(frame):
+        #logger.info("New frame!")
+        
+        # Display the resulting frame
+        cv2.imshow("preview",frame)
+        
+
     frames_grabber = FramesGrabber(logger)
-    frames_grabber.grab_frames_loop()
+    frames_grabber.register_frame_callback(frame_callback)
+    frames_grabber.run_grab_frames_loop(show = False, save_to_disk = False)
