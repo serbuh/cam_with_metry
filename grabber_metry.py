@@ -42,7 +42,7 @@ class MetryGrabberContext():
         self.last_attitude_cache = None
 
 class MetryGrabber():
-    def __init__(self, logger):
+    def __init__(self, logger, anglesRateCounterName, positionRateCounterName):
         self.logger = logger
 
         # Declare metry callback
@@ -57,8 +57,8 @@ class MetryGrabber():
         # init rateCounter
         msg_timeout = 5                         # messages timeout (in seconds). After that priod "No <message name>" will be printed
         print_rate = 2                          # print messages rate every <print_rate> seconds
-        self.metryAnglesCounter   = rateCounter.rateCounter("Metry Angles  ",  50, msg_timeout, print_rate, to_print = True, logger = self.logger)
-        self.metryPositionCounter = rateCounter.rateCounter("Metry Position",  50, msg_timeout, print_rate, to_print = True, logger = self.logger)
+        self.metryAnglesCounter   = rateCounter.rateCounter(anglesRateCounterName,    50, msg_timeout, print_rate, to_print = True, logger = self.logger)
+        self.metryPositionCounter = rateCounter.rateCounter(positionRateCounterName,  50, msg_timeout, print_rate, to_print = True, logger = self.logger)
 
         # Add grabber context to the vehicle object
         self.vehicle.metry_grabber_context = MetryGrabberContext(self)

@@ -1,20 +1,40 @@
 import logging
 from grabber_frames import FramesGrabber
 from grabber_metry import MetryGrabber
+import cv2
 
 class Grabber():
     def __init__(self, logger):
         self.logger = logger
-        self.frames_grabber = FramesGrabber(logger)
-        self.metry_grabber = MetryGrabber(logger)
+        
+        # Init frames grabber
+        self.frames_grabber = FramesGrabber(logger, "Video         ")
+        self.frames_grabber.register_frame_callback(self.frame_callback)
+
+        # Init metry grabber
+        self.metry_grabber = MetryGrabber(logger, "Metry Angles  ", "Metry Position")
+        self.metry_grabber.register_metry_callback(self.metry_callback)
 
     def grab_loop(self):
         self.metry_grabber.add_listeners()
-        self.frames_grabber.grab_frames_loop()
+        self.frames_grabber.run_grab_frames_loop(show = False, save_to_disk = False)
 
-    def exit_grab(self):
+    def stop_grab(self):
         self.metry_grabber.remove_listeners()
     
+    @staticmethod
+    def frame_callback(frame):
+        cv2.imshow("Video", frame)
+        # TODO take angles from Q
+        #global logger
+        #logger.info("New Frame")
+    
+    @staticmethod
+    def metry_callback(angles):
+        pass
+        # TODO put angles to Q
+        #global logger
+        #logger.info("New Metry")
 
 if __name__ == "__main__":
 
@@ -33,8 +53,9 @@ if __name__ == "__main__":
     logger.info("Welcome to Grabber")
 
     grabber = Grabber(logger)
+
     try:
         grabber.grab_loop()
     except KeyboardInterrupt:
         logger.info("Ctrl+C pressed")
-        grabber.exit_grab()
+        grabber.stop_grab()

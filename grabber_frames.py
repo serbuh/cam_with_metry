@@ -3,7 +3,7 @@ import logging
 import cv2
 
 class FramesGrabber():
-    def __init__(self, logger):
+    def __init__(self, logger, rateCounterName):
         self.logger = logger
         # Open the camera device
         self.capture_device = cv2.VideoCapture(0) # Use the camera ID based on /dev/videoID
@@ -19,7 +19,7 @@ class FramesGrabber():
         # init rateCounter
         msg_timeout = 5                         # messages timeout (in seconds). After that priod "No <message name>" will be printed
         print_rate = 2                          # print messages rate every <print_rate> seconds
-        self.videoCounter  = rateCounter.rateCounter("Video",  32, msg_timeout, print_rate, to_print = True, logger = self.logger)
+        self.videoCounter  = rateCounter.rateCounter(rateCounterName,  32, msg_timeout, print_rate, to_print = True, logger = self.logger)
 
         # Declare callback
         self.callback = None
@@ -84,3 +84,5 @@ if __name__ == "__main__":
     frames_grabber = FramesGrabber(logger)
     frames_grabber.register_frame_callback(frame_callback)
     frames_grabber.run_grab_frames_loop(show = False, save_to_disk = False)
+
+    logger.info("Finished")
