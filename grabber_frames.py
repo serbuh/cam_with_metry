@@ -19,7 +19,7 @@ class FramesGrabber():
         # init rateCounter
         msg_timeout = 5                         # messages timeout (in seconds). After that priod "No <message name>" will be printed
         print_rate = 2                          # print messages rate every <print_rate> seconds
-        self.videoCounter  = rateCounter.rateCounter("Video",  20, msg_timeout, print_rate)
+        self.videoCounter  = rateCounter.rateCounter("Video",  32, msg_timeout, print_rate, to_print = True, logger = self.logger)
 
     def grab_frames_loop(self):
         # Capture frame-by-frame
