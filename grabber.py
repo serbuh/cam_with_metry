@@ -2,6 +2,7 @@ import logging
 from grabber_frames import FramesGrabber
 from grabber_metry import MetryGrabber
 import cv2
+import collections
 
 class Grabber():
     def __init__(self, logger):
@@ -24,17 +25,31 @@ class Grabber():
     
     @staticmethod
     def frame_callback(frame):
+        global logger
+        
+        # Take angles from Q
+        global metry_queue
+        try:
+            angles = metry_queue[0]
+        except IndexError:
+            angles = {"NoMetry": True}
+        logger.info("Frame metry {}".format(angles))
+
+        # Show frame
         cv2.imshow("Video", frame)
-        # TODO take angles from Q
-        #global logger
-        #logger.info("New Frame")
+        
+        
+        
     
     @staticmethod
     def metry_callback(angles):
-        pass
-        # TODO put angles to Q
         #global logger
         #logger.info("New Metry")
+
+        # Put angles to Q
+        global metry_queue
+        metry_queue.append(angles)
+
 
 if __name__ == "__main__":
 
@@ -51,7 +66,9 @@ if __name__ == "__main__":
     logger.addHandler(ch)
 
     logger.info("Welcome to Grabber")
-
+    
+    metry_queue = collections.deque(maxlen=1) # TODO move it from this scope. Somehow..
+    
     grabber = Grabber(logger)
 
     try:
