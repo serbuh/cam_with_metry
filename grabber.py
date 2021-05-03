@@ -3,6 +3,8 @@ from grabber_frames import FramesGrabber
 from grabber_metry import MetryGrabber
 import cv2
 import collections
+import tkinter
+import math
 
 class Grabber():
     def __init__(self, logger):
@@ -35,10 +37,13 @@ class Grabber():
         global metry_queue
         try:
             angles = metry_queue[0]
-            logger.info("Frame metry yaw {:.4f} pitch {:.4f} roll {:.4f}".format(angles["yaw"], angles["pitch"], angles["roll"]))
+            yaw = math.degrees(angles["yaw"])
+            pitch = math.degrees(angles["pitch"])
+            roll = math.degrees(angles["roll"])
+            
+            logger.info("Frame metry yaw {:.2f} pitch {:.2f} roll {:.2f}".format(yaw, pitch, roll))
         except IndexError:
-            angles = {"NoMetry": True}
-            logger.info(angles)
+            logger.info("NoMetry")
             
 
         # Show frame
