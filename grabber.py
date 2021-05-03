@@ -9,18 +9,22 @@ class Grabber():
         self.logger = logger
         
         # Init frames grabber
+        self.logger.info("Initiate video grabber")
         self.frames_grabber = FramesGrabber(logger, "Video         ")
         self.frames_grabber.register_frame_callback(self.frame_callback)
 
         # Init metry grabber
+        self.logger.info("Initiate metry grabber")
         self.metry_grabber = MetryGrabber(logger, "Metry Angles  ", "Metry Position")
         self.metry_grabber.register_metry_callback(self.metry_callback)
 
     def grab_loop(self):
+        self.logger.info("Add metry listeners and start grab frames loop")
         self.metry_grabber.add_listeners()
         self.frames_grabber.run_grab_frames_loop(show = False, save_to_disk = False)
 
     def stop_grab(self):
+        self.logger.info("Stop grabbing")
         self.metry_grabber.remove_listeners()
     
     @staticmethod
@@ -31,14 +35,14 @@ class Grabber():
         global metry_queue
         try:
             angles = metry_queue[0]
+            logger.info("Frame metry yaw {:.4f} pitch {:.4f} roll {:.4f}".format(angles["yaw"], angles["pitch"], angles["roll"]))
         except IndexError:
             angles = {"NoMetry": True}
-        logger.info("Frame metry {}".format(angles))
+            logger.info(angles)
+            
 
         # Show frame
         cv2.imshow("Video", frame)
-        
-        
         
     
     @staticmethod
@@ -65,7 +69,10 @@ if __name__ == "__main__":
     ch.setFormatter(formatter)
     logger.addHandler(ch)
 
-    logger.info("Welcome to Grabber")
+    with open("version.txt", "r") as ver_file:
+        version = float(ver_file.read())
+    
+    logger.info("Welcome to Grabber v{}".format(version))
     
     metry_queue = collections.deque(maxlen=1) # TODO move it from this scope. Somehow..
     
