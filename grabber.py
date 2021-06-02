@@ -59,7 +59,13 @@ class Grabber():
         global metry_queue
         metry_queue.append(angles)
 
-
+class App:
+    def __init__(self, window, window_title):
+        self.window = window
+        self.window.title(window_title)
+ 
+        self.window.mainloop()
+ 
 if __name__ == "__main__":
 
     # Init logger
@@ -81,6 +87,12 @@ if __name__ == "__main__":
     
     metry_queue = collections.deque(maxlen=1) # TODO move it from this scope. Somehow..
     
+    if False:
+
+        # Create a window and pass it to the Application object
+        App(tkinter.Tk(), "Tkinter and OpenCV")
+
+
     grabber = Grabber(logger)
 
     try:
