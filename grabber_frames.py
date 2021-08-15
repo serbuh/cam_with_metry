@@ -1,6 +1,7 @@
 from rateCounter import rateCounter
 import logging
 import cv2
+import sys
 
 class FramesGrabber():
     def __init__(self, logger, rateCounterName):
@@ -11,6 +12,7 @@ class FramesGrabber():
         #Check if camera was opened correctly
         if not (self.capture_device.isOpened()):
             self.logger.error("Could not open video device")
+            sys.exit()
 
         #Set the resolution
         self.capture_device.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
