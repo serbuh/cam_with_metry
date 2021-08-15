@@ -7,9 +7,14 @@ import tkinter
 import math
 
 class Grabber():
-    def __init__(self, logger):
+    def __init__(self, logger, metry_queue):
         self.logger = logger
         
+        # Print grabber version
+        with open("version.txt", "r") as ver_file:
+            version = float(ver_file.read())
+        self.logger.info("Welcome to Grabber v{}".format(version))
+
         # Init frames grabber
         self.logger.info("Initiate video grabber")
         self.frames_grabber = FramesGrabber(logger, "Video         ")
@@ -17,8 +22,9 @@ class Grabber():
 
         # Init metry grabber
         self.logger.info("Initiate metry grabber")
-        self.metry_grabber = MetryGrabber(logger, "Metry Angles  ", "Metry Position")
+        self.metry_grabber = MetryGrabber(logger, metry_queue, "Metry Angles  ", "Metry Position")
         self.metry_grabber.register_metry_callback(self.metry_callback)
+        
 
     def grab_loop(self):
         self.logger.info("Add metry listeners and start grab frames loop")
@@ -58,14 +64,12 @@ class Grabber():
         # Put angles to Q
         global metry_queue
         metry_queue.append(angles)
+    
+    def other(self, angles):
+        self.metry_queue.apend(angles)
 
-class App:
-    def __init__(self, window, window_title):
-        self.window = window
-        self.window.title(window_title)
- 
-        self.window.mainloop()
- 
+
+
 if __name__ == "__main__":
 
     # Init logger
@@ -73,27 +77,16 @@ if __name__ == "__main__":
     logger.setLevel(logging.INFO)
     logger.propagate = False
 
-    # Console handler
+    # Init logger console handler
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     formatter = logging.Formatter(fmt='%(asctime)s %(levelname)s %(message)s', datefmt="%Y-%m-%d %H:%M:%S")
     ch.setFormatter(formatter)
     logger.addHandler(ch)
-
-    with open("version.txt", "r") as ver_file:
-        version = float(ver_file.read())
     
-    logger.info("Welcome to Grabber v{}".format(version))
-    
-    metry_queue = collections.deque(maxlen=1) # TODO move it from this scope. Somehow..
-    
-    if False:
+    metry_queue = collections.deque(maxlen=1)
 
-        # Create a window and pass it to the Application object
-        App(tkinter.Tk(), "Tkinter and OpenCV")
-
-
-    grabber = Grabber(logger)
+    grabber = Grabber(logger, metry_queue)
 
     try:
         grabber.grab_loop()

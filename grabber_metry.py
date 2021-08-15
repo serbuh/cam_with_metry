@@ -3,6 +3,7 @@ from dronekit import connect, VehicleMode
 import time
 from rateCounter import rateCounter
 import logging
+import collections
 
 class Callbacks():
     def __init__(self):
@@ -23,9 +24,9 @@ class Callbacks():
         vehicle.metry_grabber_context.metry_grabber_obj.metryAnglesCounter.newMessage()
         vehicle.metry_grabber_context.metry_grabber_obj.metryAnglesCounter.printRate(print_immediately = False)
         
-        # Build angles message and call the callback
-        angles = {"yaw": value.yaw, "pitch": value.pitch, "roll": value.roll}
-        vehicle.metry_grabber_context.metry_grabber_obj.callback(angles)
+        angles = {"yaw": value.yaw, "pitch": value.pitch, "roll": value.roll}      # Build angles message and call the callback
+        vehicle.metry_grabber_context.metry_grabber_obj.metry_queue.append(angles) # Append new angles to the Queue
+        vehicle.metry_grabber_context.metry_grabber_obj.callback(angles)           # Call for the callback with the new angles (not really needed)
         #vehicle.metry_grabber_context.logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(value.yaw, value.pitch, value.roll))
 
     @staticmethod
@@ -42,8 +43,9 @@ class MetryGrabberContext():
         self.last_attitude_cache = None
 
 class MetryGrabber():
-    def __init__(self, logger, anglesRateCounterName, positionRateCounterName):
+    def __init__(self, logger, metry_queue, anglesRateCounterName, positionRateCounterName):
         self.logger = logger
+        self.metry_queue = metry_queue
 
         # Declare metry callback
         self.callback = None
@@ -127,6 +129,8 @@ class MetryGrabber():
         self.vehicle.remove_attribute_listener('global_frame', Callbacks.location_callback)
 
 if __name__ == "__main__":
+    # The following code is just for testing!
+
     # Init logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.INFO)
@@ -142,15 +146,17 @@ if __name__ == "__main__":
     logger.info("Welcome to Metry Grabber")
 
     def metry_callback(angles):
+        logger.info("New metry! {}".format(metry_queue[0]))
         #logger.info("New metry!")
-        pass#logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(angles["yaw"], angles["pitch"], angles["roll"]))
+        #logger.info("yaw {:.4f} pitch {:.4f} roll {:.4f}".format(angles["yaw"], angles["pitch"], angles["roll"]))
 
+    metry_queue = collections.deque(maxlen=1)
 
-    metry_grabber = MetryGrabber(logger)
+    metry_grabber = MetryGrabber(logger, metry_queue, "Metry Angles  ", "Metry Position")
     metry_grabber.register_metry_callback(metry_callback)
     metry_grabber.add_listeners()
     logger.info("Wait 4 sec so callback invoked before observer removed")
-    time.sleep(4)
+    time.sleep(10)
     metry_grabber.remove_listeners()
 
     logger.info("Finished")
